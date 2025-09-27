@@ -46,9 +46,11 @@ Stack_err_t stack_verify(Stack_t * stk);
 Stack_err_t stack_dump(Stack_t *stk);
 void stack_output_err(Stack_err_t err);
 void stack_fill_poizon(Stack_t *stk);
+void clear_enter (void);
+int input_calculate(Commands *command, type_t *value);
+void stack_calculate (Stack_t *stk, Commands command, int value);
 
-
-int main() {
+int main() { 
     Stack_t stk1 = {0};
     type_t capasity = 100;
     Stack_err_t err = stack_init(&stk1, capasity);
@@ -57,12 +59,12 @@ int main() {
     }
     stack_push(&stk1, 10);
     
-    type_t value = 0; //сюда будет извлечен верхний эл-т стека
-    err = stack_pop(&stk1, &value);
-    // для калькулятора:
-    char command;
+    type_t value_pop = 0; //сюда будет извлечен верхний эл-т стека
+    err = stack_pop(&stk1, &value_pop);
+   // для калькулятора:
+    Commands command;
     type_t value = 0; 
-    stack_calculate(stk1, command, value);
+    stack_calculate(&stk1, command, value);
     //--------------
     stack_destroy(&stk1);
     printf("%d", value);
@@ -75,9 +77,9 @@ Stack_err_t stack_pop(Stack_t *stk, type_t *value) {
         stack_dump(stk);
             return err;
     }
-    stk -> size--;
     *value = stk -> data[stk -> size - 1];
     stk->data[stk->size - 1] = ERRONEOUS_VALUE; 
+    stk -> size--; 
     
 
     err = stack_verify(stk);
@@ -220,65 +222,72 @@ void clear_enter (void) {
         ;
 }
 
-int input_calculate(Stack_t *stk, Commands *command, type_t *value) {
+int input_calculate(Commands *command, type_t *value) {
     
-    while(scanf("%s %d", command, value) != 2) {
+    while(scanf("%d %d", command, value) != 2) {
         printf("Check that the input is correct\n");
         clear_enter();
     }
-   
+    return 0;
 }
 
 
 
 
 
-void stack_calculate (Stack_t **stk, Commands command, int value) {
+void stack_calculate (Stack_t *stk, Commands command, int value) {
     switch (command) {
-        case  PUSH:
-            stack_push(*stk, value);
+        case  PUSH: {
+            stack_push(stk, value);
             break;
-        case  ADD:
+        }
+        case  ADD: {
             type_t val1 = 0;
-            stack_pop(*stk, &val1);
+            stack_pop(stk, &val1);
             type_t val2 = 0;
-            stack_pop(*stk, &val2);
-            stack_push(*stk, val1 + val2);
+            stack_pop(stk, &val2);
+            stack_push(stk, val1 + val2);
             break;
-        case SUB:
+        }
+        case SUB: {
             type_t val1 = 0;
-            stack_pop(*stk, &val1);
+            stack_pop(stk, &val1);
             type_t val2 = 0;
-            stack_pop(*stk, &val2);
-            stack_push(*stk, val1 - val2);
+            stack_pop(stk, &val2);
+            stack_push(stk, val1 - val2);
             break;
-        case MUL:
+        }
+        case MUL: {
             type_t val1 = 0;
-            stack_pop(*stk, &val1);
+            stack_pop(stk, &val1);
             type_t val2 = 0;
-            stack_pop(*stk, &val2);
-            stack_push(*stk, val1 * val2);
+            stack_pop(stk, &val2);
+            stack_push(stk, val1 * val2);
             break;
-        case DIV:
+        }   
+        case DIV: {
             type_t val1 = 0;
-            stack_pop(*stk, &val1);
+            stack_pop(stk, &val1);
             type_t val2 = 0;
-            stack_pop(*stk, &val2);
-            stack_push(*stk, val1 / val2); // проблема, что 2 аргумент должен быть интом, а это не гаранируется
+            stack_pop(stk, &val2);
+            stack_push(stk, val1 / val2); // проблема, что 2 аргумент должен быть интом, а это не гаранируется
             break;
-        case OUT:
+        }
+        case OUT: {
             type_t val = 0;
-            stack_pop(*stk, &val);
+            stack_pop(stk, &val);
             printf("%d", val);
             break;
+        }
         case HTL: // зачем это вообще???
             break;
-        case SQRT:
+        case SQRT: {
             type_t val = 0;
-            stack_pop(*stk, &val);
-            val = pow(val, 0.5);
-            stack_push(*stk, val);
+            stack_pop(stk, &val);
+            val = sqrtf(val);
+            stack_push(stk, val);
             break;
+        }
         default:
             printf("Команда не распознана, введите еще раз\n");
     }
