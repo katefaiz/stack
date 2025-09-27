@@ -6,7 +6,7 @@
 #define MAX_CAPASITY 1000
 #define MAX_SIZE 1000
 #define ERRONEOUS_VALUE 666
-typedef int tipe_t;
+typedef int type_t;
 
 
 
@@ -14,44 +14,62 @@ enum Stack_err_t {
     STACK_OK                = 0,
     STACK_MEMORY_ERROR      = 1,  //ошибка выделения памяти
     STACK_INVALID_PTR       = 2,  //неправильный указетель на стек
-    STACK_INVALID_CAPACITY  = 3,  // плохой capasity
-    STACK_INVALID_SIZE      = 4,  // плохой size
+    STACK_INVALID_CAPACITY  = 3,  //плохой capasity
+    STACK_INVALID_SIZE      = 4,  //плохой size
     STACK_CORRUPTED         = 5   //повреждена структура стека
 };
 
+enum Commands {
+    PUSH    = 0, //добавление эл-та
+    ADD     = 1, //сложение
+    SUB     = 2, //вычитание
+    MUL     = 3, //умножение
+    DIV     = 4, //деление
+    OUT     = 5, //вывод последнего элемента через pop
+    HTL     = 6, //выход из цикла ???
+    SQRT    = 7  //квадратный корень
+
+};
+
 struct Stack_t {
-    tipe_t *data;  
+    type_t *data;  
     ssize_t size;
     ssize_t capasity;
 };
 
 
 Stack_err_t stack_destroy(Stack_t *stk);
-Stack_err_t stack_init(Stack_t *stk, tipe_t capasity);
-Stack_err_t stack_push(Stack_t *stk, tipe_t valie);
-Stack_err_t stack_pop(Stack_t *stk, tipe_t *err);
+Stack_err_t stack_init(Stack_t *stk, type_t capasity);
+Stack_err_t stack_push(Stack_t *stk, type_t valie);    
+Stack_err_t stack_pop(Stack_t *stk, type_t *err);
 Stack_err_t stack_verify(Stack_t * stk);
 Stack_err_t stack_dump(Stack_t *stk);
 void stack_output_err(Stack_err_t err);
 void stack_fill_poizon(Stack_t *stk);
 
+
 int main() {
     Stack_t stk1 = {0};
-    tipe_t capasity = 100;
+    type_t capasity = 100;
     Stack_err_t err = stack_init(&stk1, capasity);
     if (err != STACK_OK) {
         stack_output_err(err);
     }
     stack_push(&stk1, 10);
     
-    tipe_t value = 0; //сюда будет извлечен верхний эл-т стека
+    type_t value = 0; //сюда будет извлечен верхний эл-т стека
     err = stack_pop(&stk1, &value);
+    // для калькулятора:
+    char command;
+    type_t value = 0; 
+    stack_calculate(stk1, command, value);
+    //--------------
     stack_destroy(&stk1);
     printf("%d", value);
     return 0;
 }
 
-Stack_err_t stack_pop(Stack_t *stk, tipe_t *value) {
+Stack_err_t stack_pop(Stack_t *stk, type_t *value) {
     Stack_err_t err = stack_verify(stk);
     if (err != STACK_OK) {
         stack_dump(stk);
@@ -70,7 +88,7 @@ Stack_err_t stack_pop(Stack_t *stk, tipe_t *value) {
     return STACK_OK;
 }
 
-Stack_err_t stack_push(Stack_t *stk, tipe_t value) {
+Stack_err_t stack_push(Stack_t *stk, type_t value) {
     Stack_err_t err = stack_verify(stk);
     if (err != STACK_OK) {
         stack_dump(stk);
@@ -88,14 +106,14 @@ Stack_err_t stack_push(Stack_t *stk, tipe_t value) {
     return STACK_OK;
 }
 
-Stack_err_t stack_init(Stack_t *stk, tipe_t capasity) {
+Stack_err_t stack_init(Stack_t *stk, type_t capasity) {
 
     Stack_err_t err = stack_verify(stk);
     // if (err != STACK_OK) {
     //     stack_dump(stk);
     //         return err;
     // }
-    stk -> data = (tipe_t*)calloc((size_t)capasity , sizeof(tipe_t));
+    stk -> data = (type_t*)calloc((size_t)capasity , sizeof(type_t));
     stk -> size = 0;
     stk -> capasity = capasity;
 
@@ -137,8 +155,10 @@ Stack_err_t stack_dump(Stack_t *stk) {
     printf("size\t= %zd\n", stk -> size);
     printf("capasity= %zd\n", stk -> capasity);
     for (ssize_t i = 0; i < stk -> size; i++){
-        printf("[%zd] = %d\n", i, stk -> data[i]);
-
+        printf("*[%zd] = %d\n", i, stk -> data[i]);
+    }
+    for (ssize_t i = stk -> size; i < stk -> capasity; i++) {
+        printf("[%zd] = %d (poizon)\n", i, stk -> data[i]);
     }
     
     return STACK_OK;
@@ -188,8 +208,78 @@ void stack_output_err(Stack_err_t err) {
 }
 
 void stack_fill_poizon(Stack_t *stk) {
-    if (stk == NULL || stk->data == NULL) return;
-    for (ssize_t i = 0; i < stk -> capasity; i++) {
+
+    for (ssize_t i = 0; i < stk -> capasity; i++) { //как лучше, сразу заполнить мусором, или заполнять мусором ячейки от size до capasity
         stk -> data[i] = ERRONEOUS_VALUE;
+    }
+}
+
+void clear_enter (void) { 
+    int ch = NAN;
+    while ((ch = getchar( )) != EOF && ch  != '\n')
+        ;
+}
+
+int input_calculate(Stack_t *stk, Commands *command, type_t *value) {
+    
+    while(scanf("%s %d", command, value) != 2) {
+        printf("Check that the input is correct\n");
+        clear_enter();
+    }
+   
+}
+
+
+
+
+
+void stack_calculate (Stack_t **stk, Commands command, int value) {
+    switch (command) {
+        case  PUSH:
+            stack_push(*stk, value);
+            break;
+        case  ADD:
+            type_t val1 = 0;
+            stack_pop(*stk, &val1);
+            type_t val2 = 0;
+            stack_pop(*stk, &val2);
+            stack_push(*stk, val1 + val2);
+            break;
+        case SUB:
+            type_t val1 = 0;
+            stack_pop(*stk, &val1);
+            type_t val2 = 0;
+            stack_pop(*stk, &val2);
+            stack_push(*stk, val1 - val2);
+            break;
+        case MUL:
+            type_t val1 = 0;
+            stack_pop(*stk, &val1);
+            type_t val2 = 0;
+            stack_pop(*stk, &val2);
+            stack_push(*stk, val1 * val2);
+            break;
+        case DIV:
+            type_t val1 = 0;
+            stack_pop(*stk, &val1);
+            type_t val2 = 0;
+            stack_pop(*stk, &val2);
+            stack_push(*stk, val1 / val2); // проблема, что 2 аргумент должен быть интом, а это не гаранируется
+            break;
+        case OUT:
+            type_t val = 0;
+            stack_pop(*stk, &val);
+            printf("%d", val);
+            break;
+        case HTL: // зачем это вообще???
+            break;
+        case SQRT:
+            type_t val = 0;
+            stack_pop(*stk, &val);
+            val = pow(val, 0.5);
+            stack_push(*stk, val);
+            break;
+        default:
+            printf("Команда не распознана, введите еще раз\n");
     }
 }
