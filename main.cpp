@@ -27,7 +27,8 @@ enum Commands {
     DIV     = 4, //деление
     OUT     = 5, //вывод последнего элемента через pop
     HTL     = 6, //выход из цикла ???
-    SQRT    = 7  //квадратный корень
+    SQRT    = 7, //квадратный корень
+    ERROR   = 8  //для ошибки
 
 };
 
@@ -47,27 +48,30 @@ Stack_err_t stack_dump(Stack_t *stk);
 void stack_output_err(Stack_err_t err);
 void stack_fill_poizon(Stack_t *stk);
 void clear_enter (void);
-int input_calculate(Commands *command, type_t *value);
-void stack_calculate (Stack_t *stk, Commands command, int value);
+void input_calculate(Stack_t *stk, char * command, type_t *value);
+Commands comparing_commands(char *command);
+void stack_calculate (Stack_t *stk, char *command, int value);
 
 int main() { 
     Stack_t stk1 = {0};
-    type_t capasity = 100;
+    type_t capasity = 10;
     Stack_err_t err = stack_init(&stk1, capasity);
     if (err != STACK_OK) {
         stack_output_err(err);
     }
-    stack_push(&stk1, 10);
+    //stack_push(&stk1, 10);
     
-    type_t value_pop = 0; //сюда будет извлечен верхний эл-т стека
-    err = stack_pop(&stk1, &value_pop);
-   // для калькулятора:
-    Commands command;
-    type_t value = 0; 
-    stack_calculate(&stk1, command, value);
+    // type_t value_pop = 0; //сюда будет извлечен верхний эл-т стека
+    // err = stack_pop(&stk1, &value_pop);
+
+    // для калькулятора:
+    char command[7];
+    type_t value = 0;
+    input_calculate(&stk1, command, &value);
+    stack_dump(&stk1);
     //--------------
     stack_destroy(&stk1);
-    printf("%d", value);
+    printf("%d\n", value);
     return 0;
 }
 
@@ -222,21 +226,53 @@ void clear_enter (void) {
         ;
 }
 
-int input_calculate(Commands *command, type_t *value) {
-    
-    while(scanf("%d %d", command, value) != 2) {
-        printf("Check that the input is correct\n");
-        clear_enter();
+void input_calculate(Stack_t *stk, char *command, type_t *value) {
+    printf("Введите команду (или 'QUIT' для выхода):\n");
+    while (1) {
+        
+        if (scanf("%4s", command) != 1) { 
+            printf("Ошибка чтения команды.\n");
+            clear_enter(); 
+            continue; 
+        }
+
+        if (comparing_commands(command) == HTL) {
+            //printf("Завершение ввода команд.\n");
+            return; 
+        }
+
+        if (comparing_commands(command) == PUSH) {
+            if (scanf("%d", value) != 1) {
+                printf("Ошибка чтения значения для PUSH.\n");
+                clear_enter();
+                continue;
+            }
+        } else {
+            *value = 0; // Обнуляем value для не-PUSH команд
+        }
+        stack_calculate(stk, command, *value);
     }
-    return 0;
+    
+    
 }
 
 
+Commands comparing_commands(char *command) {
 
+    if (strcmp(command, "PUSH") == 0)   return PUSH;
+    if (strcmp(command, "ADD") == 0)    return ADD;
+    if (strcmp(command, "SUB") == 0)    return SUB;
+    if (strcmp(command, "MUL") == 0)    return MUL;
+    if (strcmp(command, "DIV") == 0)    return DIV;
+    if (strcmp(command, "OUT") == 0)    return OUT;
+    if (strcmp(command, "HTL") == 0)    return HTL;
+    if (strcmp(command, "SQRT") == 0)   return SQRT;
+    else                                    return ERROR;
+}
 
+void stack_calculate (Stack_t *stk, char* command, int value) {
 
-void stack_calculate (Stack_t *stk, Commands command, int value) {
-    switch (command) {
+    switch (comparing_commands(command)) {
         case  PUSH: {
             stack_push(stk, value);
             break;
@@ -288,6 +324,8 @@ void stack_calculate (Stack_t *stk, Commands command, int value) {
             stack_push(stk, val);
             break;
         }
+        case ERROR:
+            break;
         default:
             printf("Команда не распознана, введите еще раз\n");
     }
