@@ -38,13 +38,22 @@ CXXFLAGS := -std=c++11 -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -W
 -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer -Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE -Werror=vla \
 -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-CPPOBJ := ./main.o
+CPPOBJ :=  ./stack_funks.o ./stack_check.o ./processor.o
 
 stack.exe: $(CPPOBJ)
-	g++ $(CXXFLAGS) $(CPPOBJ) -o ./stack.exe
+	g++ $(CXXFLAGS) $(CPPOBJ) -o ./stack.exe 
 
-./main.o: ./main.cpp
-	g++ $(CXXFLAGS) -c ./main.cpp -o ./main.o
+# ./main.o: ./main.cpp
+# 	g++ $(CXXFLAGS) -c ./main.cpp -o ./main.o
+
+./stack_funks.o: ./stack_funks.cpp
+	g++ $(CXXFLAGS) -c ./stack_funks.cpp -o ./stack_funks.o
+
+./stack_check.o: ./stack_check.cpp
+	g++ $(CXXFLAGS) -c ./stack_check.cpp -o ./stack_check.o
+
+./processor.o: ./processor.cpp
+	g++ $(CXXFLAGS) -c ./processor.cpp -o ./processor.o
 
 stack: $(CPPOBJ)
 	g++ $(CXXFLAGS) $(CPPOBJ) -o ./stack
