@@ -9,4 +9,4 @@ Stack_err_t stack_push(Stack_t *stk, type_t valie);
 Stack_err_t stack_pop(Stack_t *stk, type_t *err);
 
 
-#endif
+#endif // FUNKS_H

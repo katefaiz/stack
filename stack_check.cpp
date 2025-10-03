@@ -7,6 +7,8 @@
 #include "stack_check.h"
 
 Stack_err_t stack_dump(Stack_t *stk, Stack_err_t err) {
+    assert(stk != NULL);
+
     stack_output_err(err);
     printf("\n=== STACK DUMP ===\n");
     printf("addres\t= %p\n", stk);
@@ -19,9 +21,10 @@ Stack_err_t stack_dump(Stack_t *stk, Stack_err_t err) {
         printf("[%zd] = %d (poizon)\n", i, stk -> data[i]);
     }
     
-    return STACK_OK;
+    return NO_ERROR;
 }
 Stack_err_t stack_verify(Stack_t * stk) {
+    assert(stk != NULL);
     
     if (stk == NULL)
         return STACK_INVALID_PTR;
@@ -39,14 +42,14 @@ Stack_err_t stack_verify(Stack_t * stk) {
         if (stk -> data[i] != POIZON)
             return STACK_POIZON_ERROR;
     }
-    return STACK_OK;
+    return NO_ERROR;
 }
 
 void stack_output_err(Stack_err_t err) {
     printf("\n");
     switch (err) {
-        case STACK_OK:
-        printf("все гуд\n");
+        case NO_ERROR:
+            printf("все гуд\n"); 
             break;
         case STACK_MEMORY_ERROR:
             printf("ошибка выделения памяти\n");
@@ -69,6 +72,9 @@ void stack_output_err(Stack_err_t err) {
         case STACK_POIZON_ERROR:
             printf("Ошибка в заполнении пустот значениями poizon\n");
             break;
+        case OPENFILE_ERROR:
+            printf("Ошибка в открытии файла\n");
+            break;
         default:
             printf("ошибка возвращаемого значения");
     }
@@ -76,6 +82,7 @@ void stack_output_err(Stack_err_t err) {
 }
 
 void stack_fill_poizon(Stack_t *stk) {
+    assert(stk != NULL);
 
     for (long int i = stk -> size; i < stk -> capasity; i++) { 
         stk -> data[i] = POIZON;
