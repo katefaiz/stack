@@ -12,7 +12,7 @@ Stack_err_t stack_pop(Stack_t *stk, type_t *value) {
     assert(stk != NULL);
     assert(value != NULL);
     Stack_err_t err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
             return err;
     }
@@ -26,17 +26,17 @@ Stack_err_t stack_pop(Stack_t *stk, type_t *value) {
     
 
     err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
             return err;
     }
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }
 
 Stack_err_t stack_push(Stack_t *stk, type_t value) {
     assert(stk != NULL);
     Stack_err_t err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
         return err; 
     }
@@ -59,12 +59,12 @@ Stack_err_t stack_push(Stack_t *stk, type_t value) {
     stk -> size++;
 
     err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
         return err; 
     }
 
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }
 
 Stack_err_t stack_init(Stack_t *stk, type_t capasity) {
@@ -84,18 +84,18 @@ Stack_err_t stack_init(Stack_t *stk, type_t capasity) {
     stack_fill_poizon(stk); 
 
     Stack_err_t err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
             return err;
     }
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }
 
 Stack_err_t stack_destroy(Stack_t *stk) {
     assert(stk != NULL);
 
     Stack_err_t err = stack_verify(stk);
-    if (err != NO_ERROR) {
+    if (err != STACK_NO_ERROR) {
         stack_dump(stk, err);
             return err;
     }
@@ -106,5 +106,5 @@ Stack_err_t stack_destroy(Stack_t *stk) {
     stk -> size = 0;
     stk -> capasity = 0;
 
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }

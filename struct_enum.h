@@ -9,7 +9,7 @@ const type_t CANARY_VALUE = 999;
 const type_t POIZON = 666;
 
 enum Stack_err_t {
-    NO_ERROR                = 0,
+    STACK_NO_ERROR          = 0,
     STACK_MEMORY_ERROR      = 1,  //ошибка выделения памяти
     STACK_INVALID_PTR       = 2,  //неправильный указетель на стек
     STACK_INVALID_CAPACITY  = 3,  //плохой capasity
@@ -17,7 +17,7 @@ enum Stack_err_t {
     STACK_CORRUPTED         = 5,  //повреждена структура стека
     CANARY_CORRUPTED        = 6,  //повреждение канарейки
     STACK_POIZON_ERROR      = 7,   //ошибка в заполнении пойзонами 
-    OPENFILE_ERROR          = 8    //ошибка открытия файла
+    STACK_OPENFILE_ERROR    = 8    //ошибка открытия файла
 };
 
 enum Commands {

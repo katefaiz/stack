@@ -21,7 +21,7 @@ Stack_err_t stack_dump(Stack_t *stk, Stack_err_t err) {
         printf("[%zd] = %d (poizon)\n", i, stk -> data[i]);
     }
     
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }
 Stack_err_t stack_verify(Stack_t * stk) {
     assert(stk != NULL);
@@ -42,13 +42,13 @@ Stack_err_t stack_verify(Stack_t * stk) {
         if (stk -> data[i] != POIZON)
             return STACK_POIZON_ERROR;
     }
-    return NO_ERROR;
+    return STACK_NO_ERROR;
 }
 
 void stack_output_err(Stack_err_t err) {
     printf("\n");
     switch (err) {
-        case NO_ERROR:
+        case STACK_NO_ERROR:
             printf("все гуд\n"); 
             break;
         case STACK_MEMORY_ERROR:
@@ -72,7 +72,7 @@ void stack_output_err(Stack_err_t err) {
         case STACK_POIZON_ERROR:
             printf("Ошибка в заполнении пустот значениями poizon\n");
             break;
-        case OPENFILE_ERROR:
+        case STACK_OPENFILE_ERROR:
             printf("Ошибка в открытии файла\n");
             break;
         default:
