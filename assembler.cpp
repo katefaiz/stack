@@ -5,21 +5,9 @@
 #include <assert.h>
 #include <sys/stat.h>
 
-#include "stack_funks.h" 
+#include "commands_funks.h" 
 
-struct Processor {
-    Stack_t stk;   
-    int code[100] = {};
-    int counter = 0;
-    int regs[10] = {}; // мне регистры создавать как enum или в массив               
-};
 
-enum Processor_err {
-    NO_ERROR                = 0,
-    OPENFILE_ERROR          = 1,
-    STACK_ERROR             = 2
-
-};
 
 void input_calculate(Stack_t *stk, char * command, type_t *value);
 Commands comparing_commands(const char *command);
@@ -28,6 +16,8 @@ Processor_err asm_commands_data(int *program);
 Processor_err disasm_commands_data(int program[]);
 Processor_err bite_code_file(int program[], int size);
 Processor_err bite_code_read(Processor *processor);
+Processor_err run_bytecode(Processor *processor);
+Processor_err processor_init(Processor *processor, type_t capacity);
 
 
 
@@ -41,8 +31,12 @@ int main() {
     // }
 
     Processor processor;
-
-    int program[100] = {}; 
+    Processor_err proc_err = processor_init(&processor, 100);
+    if (proc_err != NO_ERROR) {
+        printf("Ошибка инициализации процессора\n");
+        return 1;
+    }
+    int program[40] = {}; 
     asm_commands_data(program);
     //disasm_commands_data(program);
     // для калькулятора:
@@ -55,9 +49,28 @@ int main() {
     // stack_destroy(&stk1);
     bite_code_file(program, 100);
     bite_code_read(&processor);
-    for (int i = 0; i < 50; i++) {
+    run_bytecode(&processor);
+    printf("-----------------------------------\n");
+    stack_dump(&processor.stk, stack_verify(&processor.stk));
+    for (int i = 0; i < 40; i++) {
         printf("%d ", processor.code[i]);
     }
+}
+
+Processor_err processor_init(Processor *processor, type_t capacity) {
+    assert(processor != NULL);
+    
+    processor->counter = 0;
+    memset(processor->regs, 0, sizeof(processor->regs));
+    memset(processor->code, 0, sizeof(processor->code));
+    
+    Stack_err_t stack_err = stack_init(&processor->stk, capacity);
+    if (stack_err != STACK_NO_ERROR) {
+        printf("Ошибка инициализации стека: %d\n", stack_err);
+        return STACK_ERROR;
+    }
+    
+    return NO_ERROR;
 }
 
 
@@ -104,6 +117,57 @@ Processor_err bite_code_read(Processor *processor) { //читает файл с 
 
 }
 
+Processor_err run_bytecode(Processor *processor) {
+    assert(processor != 0);
+    
+    while (processor->counter < 100) {
+        int command = processor->code[processor->counter];
+        if (command == HLT) 
+            break;
+        
+        int step = 1;
+        switch (command) {
+            case HLT: 
+                //processor_HLT(processor);
+                break;
+            case PUSH: 
+                processor_PUSH(processor);
+                step = 2;
+                break;          
+        
+            case ADD: 
+                processor_ADD(processor);
+                break;
+            case SUB: 
+                processor_SUB(processor);
+                break;
+            case MUL: 
+                processor_MUL(processor);
+                break;
+            case DIV: 
+                processor_DIV(processor);
+                break;
+            case SQRT: 
+                processor_SQRT(processor);
+                break;
+            case OUT: 
+                processor_OUT(processor);
+                break;
+            default: 
+                printf("Неизвестная команда: %d\n", command);
+                stack_destroy(&processor->stk);
+                return STACK_ERROR;
+            
+        }
+        //processor_HLT(processor);
+        processor->counter += step;
+    }
+    
+    
+    return NO_ERROR;
+}
+
+
 
 Processor_err asm_commands_data(int *program) { //считывает файл с командами и записывает байт-код в файл 
 
@@ -113,13 +177,7 @@ Processor_err asm_commands_data(int *program) { //считывает файл с
     if (filestream == NULL) 
         return OPENFILE_ERROR;
 
-    // struct stat st;
-    // if (stat("commands_data.txt", &st) == -1) {
-    //     fclose(filestream);
-    //         OPENFILE_ERROR;    
-    // }
-    // long fsize = st.st_size;
-
+   
     char line[100]; // каждая отдельная строка
     int count = 0; //счетчик для массива
 
@@ -138,21 +196,28 @@ Processor_err asm_commands_data(int *program) { //считывает файл с
         program[count++] = cmd_code;
         //printf("\n%d", cmd_code);
         if (cmd_code == PUSH) {
-            if (line[ind] == ' ') { //копирую значение
-                int value_ind = 0;
-                for (int i = ind + 1; line[i] != '\0'; i++) {
-                    value_str[value_ind] = line[i];
-                    value_ind++;
-                }
-                value_str[value_ind] = '\0';
-                value = atoi(value_str); // TODO: atoi(line + ind + 1)
+            if (line[ind] == ' ') { 
+                value = atoi(line + ind + 1); 
                 program[count++] = value;
-                }
-        }    
+            }
+        }
+        // if (cmd_code == PUSH) {
+        //     if (line[ind] == ' ') { //копирую значение
+        //         int value_ind = 0;
+        //         for (int i = ind + 1; line[i] != '\0'; i++) {
+        //             value_str[value_ind] = line[i];
+        //             value_ind++;
+        //         }
+        //         value_str[value_ind] = '\0';
+        //         value = atoi(value_str); // atoi(line + ind + 1)
+        //         program[count++] = value;
+        //         }
+        // }    
     }
     fclose(filestream);
     return NO_ERROR;
 }
+
 
 
 
@@ -317,7 +382,7 @@ void stack_calculate (Stack_t *stk, char* command, int value) {
         case OUT: {
             type_t val = 0;
             stack_pop(stk, &val);
-            printf("%d", val);
+            printf("%d\n", val);
             break;
         }
         case HLT: 
@@ -332,7 +397,7 @@ void stack_calculate (Stack_t *stk, char* command, int value) {
         case ERROR:
             break;
         default:
-            printf("Команда не распознана, введите еще раз\n");
+            printf("Команда не распознана\n");
     }
 }
 

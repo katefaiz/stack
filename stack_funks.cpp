@@ -55,7 +55,7 @@ Stack_err_t stack_push(Stack_t *stk, type_t value) {
     }
     
 
-    stk -> data[stk -> size] = value * 1000;
+    stk -> data[stk -> size] = value ; //*1000
     stk -> size++;
 
     err = stack_verify(stk);
